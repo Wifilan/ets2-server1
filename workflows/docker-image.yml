@@ -1,0 +1,117 @@
+name: Docker Image CI
+
+on:
+  push:
+    tags: [ "v*.*.*" ]
+  pull_request:
+    branches: [ "master" ]
+
+jobs:
+  build-ets2:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Check out the repo
+        uses: actions/checkout@v4
+
+      - name: Write VERSION file
+        run: |
+          touch VERSION
+          echo "${{ github.ref_name || 'devel' }}" > VERSION
+        shell: bash
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+      
+      - name: Docker meta
+        id: meta
+        uses: docker/metadata-action@v4
+        with:
+          images: |
+            wifilan/ets2-convoy-server
+            ghcr.io/wifilan/ets2-convoy-server
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v2
+        if: ${{ github.ref_type == 'tag' }}
+        with:
+          username: ${{ secrets.registry_user }}
+          password: ${{ secrets.registry_password }}
+
+      - name: Login to Github Container Registry
+        uses: docker/login-action@v2
+        if: ${{ github.ref_type == 'tag' }}
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: ETS2 Convoy Server | Build and Push
+        uses: docker/build-push-action@v3
+        with:
+          context: .
+          file: ./Dockerfile
+          push: ${{ github.ref_type == 'tag' }}
+          platforms: linux/amd64
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+
+  build-ats:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Check out the repo
+        uses: actions/checkout@v4
+
+      - name: Write VERSION file
+        run: |
+          touch VERSION
+          echo "${{ github.ref_name || 'devel' }}" > VERSION
+        shell: bash
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+      
+      - name: Docker meta
+        id: meta
+        uses: docker/metadata-action@v4
+        with:
+          images: |
+            wifilan/ats-convoy-server
+            ghcr.io/wifilan/ats-convoy-server
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v2
+        if: ${{ github.ref_type == 'tag' }}
+        with:
+          username: ${{ secrets.registry_user }}
+          password: ${{ secrets.registry_password }}
+
+      - name: Login to Github Container Registry
+        uses: docker/login-action@v2
+        if: ${{ github.ref_type == 'tag' }}
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: ATS Convoy Server | Build and Push
+        uses: docker/build-push-action@v3
+        with:
+          context: .
+          file: ./Dockerfile
+          push: ${{ github.ref_type == 'tag' }}
+          build-args: |
+            APP_ID=2239530
+            SAVEGAME_LOCATION=/home/steam/.local/share/American Truck Simulator/
+            EXECUTABLE=/app/bin/linux_x64/amtrucks_server
+            DEFAULT_PACKAGES=default_packages/ats
+          platforms: linux/amd64
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
