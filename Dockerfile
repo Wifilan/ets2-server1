@@ -24,6 +24,7 @@ RUN mkdir -p "${SAVEGAME_LOCATION}" \
     && chown steam:steam -R "${SAVEGAME_LOCATION}" \
     && mkdir -p /default_packages
 
+COPY server_entrypoint /server_entrypoint
 COPY ets_server_entrypoint.py /ets_server_entrypoint.py
 COPY entrypoint.sh /entrypoint
 COPY VERSION /version
