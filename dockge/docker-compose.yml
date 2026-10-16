@@ -1,0 +1,21 @@
+services:
+  ets2-server:
+    image: wifilan/ets2-convoy-server
+    container_name: ets2-server
+    restart: unless-stopped
+    tty: true
+    # ВАЖНО: host-режим нужен, чтобы сервер отображался в списке игр.
+    network_mode: host
+    environment:
+      - ETS_SERVER_UPDATE_ON_START=true
+      - ETS_SERVER_NAME=${ETS_SERVER_NAME}
+      - ETS_SERVER_DESCRIPTION=${ETS_SERVER_DESCRIPTION}
+      - ETS_SERVER_WELCOME_MESSAGE=${ETS_SERVER_WELCOME_MESSAGE}
+      - ETS_SERVER_PASSWORD=${ETS_SERVER_PASSWORD}
+      - ETS_SERVER_ADMIN_PASSWORD=${ETS_SERVER_ADMIN_PASSWORD}
+      - ETS_SERVER_MAX_PLAYERS=${ETS_SERVER_MAX_PLAYERS}
+      - ETS_SERVER_SLOT_COUNT=${ETS_SERVER_SLOT_COUNT}
+      - ETS_SERVER_PORT=${ETS_SERVER_PORT}
+      - ETS_SERVER_QUERY_PORT=${ETS_SERVER_QUERY_PORT}
+      # Обход лимита 8 игроков (требует ETS2/ATS версии 1.59+)
+      - ETS_SERVER_MAX_PLAYER_WORKAROUND=${ETS_SERVER_MAX_PLAYER_WORKAROUND}
